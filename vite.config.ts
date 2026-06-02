@@ -1,0 +1,17 @@
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  // Fix: Cast process to any to avoid TypeScript error "Property 'cwd' does not exist on type 'Process'"
+  const env = loadEnv(mode, (process as any).cwd(), '');
+  return {
+    plugins: [react()],
+    define: {
+      // Fix: Define API_KEY specifically to avoid overwriting the entire process.env object which breaks React
+      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.VITE_OPEN_WEATHER_API_KEY': JSON.stringify(env.VITE_OPEN_WEATHER_API_KEY)
+    }
+  }
+})

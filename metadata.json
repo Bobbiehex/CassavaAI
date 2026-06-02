@@ -1,0 +1,9 @@
+{
+  "name": "CassavaAI",
+  "description": "A comprehensive AI-powered farm monitoring system integrating Cassava surveillance using advanced computer vision and data analytics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
