@@ -6,11 +6,31 @@ const router = express.Router();
 let aiClient = null;
 function getAI() {
   if (!aiClient) {
-    const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    const rawKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+    const key = rawKey.trim();
     if (!key) {
       throw new Error("GEMINI_API_KEY environment variable is required. Please set it in the Settings menu (or in your .env file).");
     }
-    aiClient = new GoogleGenAI({ apiKey: key });
+    
+    // Check if it looks like a non-standard key that might require Bearer auth or just pass normally
+    const isStandardKey = key.startsWith('AIza') || key.length === 39;
+    
+    aiClient = new GoogleGenAI({ 
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build'
+        }
+      }
+    });
+
+    // If it's potentially a Bearer token rather than an API key (e.g. OAuth token), 
+    // we could optionally add it to headers, but the standard for Gemini is apiKey.
+    if (!isStandardKey) {
+       console.warn("Notice: The provided GEMINI_API_KEY does not start with 'AIza' and may be rejected by the Google API if it expects a standard API key.");
+       // Note: we still pass it as apiKey. If the user intends for this to be a Bearer token,
+       // they should generate a proper AIza API key for GoogleGenAI.
+    }
   }
   return aiClient;
 }
@@ -67,7 +87,7 @@ router.post('/analyze', async (req, res) => {
 
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro',
+      model: 'gemini-3.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
@@ -137,7 +157,7 @@ router.post('/chat', async (req, res) => {
 
     const ai = getAI();
     const chat = ai.chats.create({
-      model: 'gemini-3.1-pro',
+      model: 'gemini-3.5-flash',
       config: {
         systemInstruction
       }
@@ -159,7 +179,7 @@ router.post('/chat', async (req, res) => {
     });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro',
+      model: 'gemini-3.5-flash',
       contents,
       config: {
         systemInstruction
