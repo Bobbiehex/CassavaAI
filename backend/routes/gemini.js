@@ -87,7 +87,7 @@ router.post('/analyze', async (req, res) => {
 
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
@@ -157,7 +157,7 @@ router.post('/chat', async (req, res) => {
 
     const ai = getAI();
     const chat = ai.chats.create({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       config: {
         systemInstruction
       }
@@ -179,7 +179,7 @@ router.post('/chat', async (req, res) => {
     });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents,
       config: {
         systemInstruction
