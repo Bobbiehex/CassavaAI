@@ -5,7 +5,13 @@ import { getApiBaseUrl } from '../config';
 export const analyzeCropImage = async (base64Image: string): Promise<AIAnalysisResult> => {
    try {
        const API_BASE_URL = getApiBaseUrl();
-       const response = await fetch(`${API_BASE_URL}/gemini/analyze`, {
+       
+       let finalUrl = API_BASE_URL;
+       if (finalUrl.includes('localhost')) {
+           finalUrl = '/api'; // Prevent mixed content or localhost connection refused in preview
+       }
+
+       const response = await fetch(`${finalUrl}/gemini/analyze`, {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({ image: base64Image })
@@ -53,7 +59,11 @@ export const createChatSession = (language: string = 'english'): any => {
 export const sendChatMessage = async (chatSession: any, message: string, history: any[] = []): Promise<string> => {
    try {
        const API_BASE_URL = getApiBaseUrl();
-       const response = await fetch(`${API_BASE_URL}/gemini/chat`, {
+       let finalUrl = API_BASE_URL;
+       if (finalUrl.includes('localhost')) {
+           finalUrl = '/api'; // Prevent mixed content or localhost connection refused in preview
+       }
+       const response = await fetch(`${finalUrl}/gemini/chat`, {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({ message, language: chatSession.language, history, isSupport: chatSession.isSupport })

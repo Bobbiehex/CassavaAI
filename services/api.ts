@@ -43,6 +43,36 @@ export const ApiService = {
     };
   },
 
+  // --- Reports ---
+
+  async getAllReports() {
+    const API_BASE_URL = getApiBaseUrl();
+    const res = await fetch(`${API_BASE_URL}/reports`, { headers: ApiService.getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch reports');
+    return await res.json();
+  },
+
+  async saveReport(report: any) {
+    const API_BASE_URL = getApiBaseUrl();
+    const res = await fetch(`${API_BASE_URL}/reports`, {
+      method: 'POST',
+      headers: ApiService.getHeaders(),
+      body: JSON.stringify(report)
+    });
+    if (!res.ok) throw new Error('Failed to save report');
+    return await res.json();
+  },
+
+  async deleteReport(id: string) {
+    const API_BASE_URL = getApiBaseUrl();
+    const res = await fetch(`${API_BASE_URL}/reports/${id}`, {
+      method: 'DELETE',
+      headers: ApiService.getHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete report');
+    return await res.json();
+  },
+
   /**
    * Fetches real-time weather data from OpenWeatherMap using user geolocation, specific coordinates, or a location string
    */

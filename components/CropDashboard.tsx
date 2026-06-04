@@ -135,7 +135,7 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
 
   const loadReports = async () => {
     try {
-        const data = await dbService.getAllReports();
+        const data = await ApiService.getAllReports();
         setReports(data.reverse()); // Newest first
     } catch (e) {
         console.error("Failed to load reports", e);
@@ -320,6 +320,19 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
         const result = await analyzeCropImage(analysisImage.split(',')[1]);
         setAnalysisResult(result);
         
+        // Save to DB automatically so it appears in history
+        const report = {
+          id: `report-${Date.now()}`,
+          type: 'CROP_ANALYSIS' as const,
+          title: `Crop Analysis: ${result.detectedSubject}`,
+          summary: `${result.detectedSubject} - ${result.condition}`,
+          details: result,
+          imageBase64: analysisImage,
+          timestamp: Date.now()
+        };
+        await ApiService.saveReport(report);
+        loadReports();
+        
         // Critical Alert Logic
         if (result.condition.toLowerCase().includes('critical')) {
           addNotification({ 
@@ -393,7 +406,7 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
 
   const handleDeleteReport = async (id: string) => {
     try {
-        await dbService.deleteReport(id);
+        await ApiService.deleteReport(id);
         addNotification({ title: 'Report Deleted', message: 'Historical report removed.', type: 'INFO' });
         loadReports();
     } catch (e) {

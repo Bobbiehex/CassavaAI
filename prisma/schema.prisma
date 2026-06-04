@@ -29,6 +29,20 @@ model User {
   farms          Farm[]          @relation("UserFarms")
   chatMessages   ChatMessage[]   @relation("UserChats")
   loginSessions  LoginSession[]
+  reports        Report[]        @relation("UserReports")
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  type        String
+  title       String
+  summary     String
+  details     Json?
+  imageBase64 String?  @db.Text
+  timestamp   Float?
+  userId      String
+  user        User     @relation("UserReports", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }
 
 model LoginSession {
