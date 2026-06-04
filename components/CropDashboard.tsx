@@ -69,6 +69,8 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
   const [ndviColorScheme, setNdviColorScheme] = useState<NdviColorScheme>('RG');
   const [reports, setReports] = useState<any[]>([]);
   const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
   const mapInputRef = useRef<HTMLInputElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -449,6 +451,19 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
   };
 
   const ndviColors = getNdviColors(ndviColorScheme);
+
+  const handleToggleComparison = (id: string) => {
+    setSelectedForComparison(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(item => item !== id);
+      } else {
+        if (prev.length >= 2) {
+          return [prev[1], id];
+        }
+        return [...prev, id];
+      }
+    });
+  };
 
   // Generate Graph Data from real history
   const growthData = useMemo(() => {
@@ -965,11 +980,28 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
 
           {/* Historical Reports Section */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-between items-center flex-wrap gap-2">
               <h3 className="font-semibold text-slate-800 dark:text-white flex items-center gap-2">
                 <FileText className="text-blue-500" size={18} />
                 {t('history_reports')}
               </h3>
+              {reports.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {selectedForComparison.length === 0 
+                      ? "Select 2 reports to compare"
+                      : `${selectedForComparison.length} of 2 selected`
+                    }
+                  </span>
+                  <button
+                    onClick={() => setShowComparisonModal(true)}
+                    disabled={selectedForComparison.length !== 2}
+                    className="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                  >
+                    <span>Compare Side-by-Side</span>
+                  </button>
+                </div>
+              )}
             </div>
             <div className="p-4">
               {reports.length === 0 ? (
@@ -978,40 +1010,59 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {reports.map((report) => (
-                    <div 
-                      key={report.id} 
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${report.type === 'FIELD_SUMMARY' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
-                          <FileText size={16} />
+                  {reports.map((report) => {
+                    const isSelected = selectedForComparison.includes(report.id);
+                    return (
+                      <div 
+                        key={report.id} 
+                        className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                          isSelected 
+                            ? 'border-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/10 shadow-sm' 
+                            : 'border-slate-100 dark:border-slate-700'
+                        } hover:bg-slate-50 dark:hover:bg-slate-900`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {/* Comparison Checkbox */}
+                          <button
+                            onClick={() => handleToggleComparison(report.id)}
+                            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                              isSelected 
+                                ? 'border-emerald-600 bg-emerald-600 text-white shadow' 
+                                : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
+                            }`}
+                            title="Select for side-by-side comparison"
+                          >
+                            {isSelected && <span className="text-[10px] font-bold">✓</span>}
+                          </button>
+
+                          <div className={`p-2 rounded-lg shrink-0 ${report.type === 'FIELD_SUMMARY' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                            <FileText size={16} />
+                          </div>
+                          <div className="truncate pr-2">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{report.title}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              {report.type === 'FIELD_SUMMARY' ? t('report_type_field') : t('report_type_analysis')} • {new Date(report.timestamp).toLocaleString()}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{report.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {report.type === 'FIELD_SUMMARY' ? t('report_type_field') : t('report_type_analysis')} • {new Date(report.timestamp).toLocaleString()}
-                          </p>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button 
+                            onClick={() => setSelectedReport(report)}
+                            className="px-3 py-1.5 text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                          >
+                            {t('view_report')}
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors flex items-center gap-1"
+                            title={t('delete_report')}
+                          >
+                            <span className="text-xs font-medium">{t('delete_report')}</span>
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => setSelectedReport(report)}
-                          className="px-3 py-1 text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          {t('view_report')}
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteReport(report.id)}
-                          className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
-                          title={t('delete_report')}
-                        >
-                          <CheckCircle size={16} className="opacity-0" /> {/* Spacer */}
-                          <span className="text-xs font-medium">{t('delete_report')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1106,6 +1157,217 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
               </div>
             </div>
           )}
+
+          {/* Historical Reports Comparison Modal */}
+          {showComparisonModal && selectedForComparison.length === 2 && (() => {
+            const comparedReports = reports
+              .filter(r => selectedForComparison.includes(r.id))
+              .sort((a, b) => a.timestamp - b.timestamp); // Older first (left to right progression)
+            
+            const r1 = comparedReports[0];
+            const r2 = comparedReports[1];
+
+            return (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-scale-up">
+                  {/* Modal Header */}
+                  <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900 shadow-sm">
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-lg">Side-by-Side Crop Report Comparison</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Comparing performance, health, and AI diagnostics over time</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowComparisonModal(false)}
+                      className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors font-bold text-slate-400 hover:text-slate-700 text-xl"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  {/* Modal Scrollable Body */}
+                  <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      {/* Report 1 (Left / Older) */}
+                      {r1 && (
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                          <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Baseline Assessment (Earlier)</span>
+                              <h4 className="text-base font-bold text-slate-950 dark:text-white mt-1">{r1.title}</h4>
+                              <p className="text-xs text-slate-500 mt-0.5">{new Date(r1.timestamp).toLocaleString()}</p>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${r1.type === 'FIELD_SUMMARY' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {r1.type === 'FIELD_SUMMARY' ? 'Field summary' : 'Plant Diagnostic'}
+                            </span>
+                          </div>
+
+                          {r1.imageBase64 && (
+                            <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                              <img src={r1.imageBase64} alt="Diagnostic scan A" className="w-full h-full object-cover" />
+                            </div>
+                          )}
+
+                          <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-700/80">
+                            <span className="text-[10px] uppercase font-bold text-slate-400">Diagnostic Summary</span>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">{r1.summary}</p>
+                          </div>
+
+                          {r1.type === 'CROP_ANALYSIS' && r1.details && (
+                            <div className="space-y-4">
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-rose-500 block mb-2">Detected Stressors & Issues</span>
+                                {r1.details.issues && r1.details.issues.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {r1.details.issues.map((issue: string, idx: number) => (
+                                      <span key={idx} className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-medium rounded border border-rose-100 dark:border-rose-900/50">
+                                        {issue}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-slate-400 italic">No key pathological issues detected.</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">Prescribed Recommendations</span>
+                                {r1.details.recommendations && r1.details.recommendations.length > 0 ? (
+                                  <ul className="space-y-1.5">
+                                    {r1.details.recommendations.map((rec: string, idx: number) => (
+                                      <li key={idx} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
+                                        <CheckCircle size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                                        <span>{rec}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-xs text-slate-400 italic">No recommendations specified.</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {r1.type === 'FIELD_SUMMARY' && r1.details && (
+                            <div className="grid grid-cols-2 gap-3.5 pt-2">
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">NDVI Performance</span>
+                                <p className="text-base font-extrabold text-slate-900 dark:text-white mt-1">{r1.details.ndvi}</p>
+                              </div>
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">Soil Moisture</span>
+                                <p className="text-base font-extrabold text-slate-900 dark:text-white mt-1">{r1.details.soilMoisture}%</p>
+                              </div>
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 col-span-2">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">General Field Health State</span>
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-1">{r1.details.status}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Report 2 (Right / Newer) */}
+                      {r2 && (
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                          <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                              <span className="text-[10px] uppercase font-extrabold tracking-wider text-emerald-600">Follow-up Assessment (Later)</span>
+                              <h4 className="text-base font-bold text-slate-955 dark:text-white mt-1">{r2.title}</h4>
+                              <p className="text-xs text-slate-500 mt-0.5">{new Date(r2.timestamp).toLocaleString()}</p>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${r2.type === 'FIELD_SUMMARY' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {r2.type === 'FIELD_SUMMARY' ? 'Field summary' : 'Plant Diagnostic'}
+                            </span>
+                          </div>
+
+                          {r2.imageBase64 && (
+                            <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                              <img src={r2.imageBase64} alt="Diagnostic scan B" className="w-full h-full object-cover" />
+                            </div>
+                          )}
+
+                          <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-700/80">
+                            <span className="text-[10px] uppercase font-bold text-slate-400">Diagnostic Summary</span>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">{r2.summary}</p>
+                          </div>
+
+                          {r2.type === 'CROP_ANALYSIS' && r2.details && (
+                            <div className="space-y-4">
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-rose-500 block mb-2">Detected Stressors & Issues</span>
+                                {r2.details.issues && r2.details.issues.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {r2.details.issues.map((issue: string, idx: number) => (
+                                      <span key={idx} className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-medium rounded border border-rose-100 dark:border-rose-900/50">
+                                        {issue}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-slate-400 italic">No key pathological issues detected.</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">Prescribed Recommendations</span>
+                                {r2.details.recommendations && r2.details.recommendations.length > 0 ? (
+                                  <ul className="space-y-1.5">
+                                    {r2.details.recommendations.map((rec: string, idx: number) => (
+                                      <li key={idx} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
+                                        <CheckCircle size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                                        <span>{rec}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-xs text-slate-400 italic">No recommendations specified.</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {r2.type === 'FIELD_SUMMARY' && r2.details && (
+                            <div className="grid grid-cols-2 gap-3.5 pt-2">
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">NDVI Performance</span>
+                                <p className="text-base font-extrabold text-slate-900 dark:text-white mt-1">{r2.details.ndvi}</p>
+                              </div>
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">Soil Moisture</span>
+                                <p className="text-base font-extrabold text-slate-900 dark:text-white mt-1">{r2.details.soilMoisture}%</p>
+                              </div>
+                              <div className="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 col-span-2">
+                                <span className="text-[10px] text-slate-400 uppercase font-bold">General Field Health State</span>
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-1">{r2.details.status}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="p-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+                    <button
+                      onClick={() => setSelectedForComparison([])}
+                      className="px-4 py-2 text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all"
+                    >
+                      Clear Selection
+                    </button>
+                    <button 
+                      onClick={() => setShowComparisonModal(false)}
+                      className="px-6 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-600 transition-all text-sm"
+                    >
+                      Close Comparison
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
       </div>

@@ -1,11 +1,11 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
 import prisma from '../prismaClient.js';
 
 const router = express.Router();
 
 // Get all reports for user
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     const reports = await prisma.report.findMany({
       where: { userId: req.user.id },
@@ -19,7 +19,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Save a new report
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     const { id, type, title, summary, details, imageBase64, timestamp } = req.body;
     
@@ -47,7 +47,7 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Delete a report
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
