@@ -1,13 +1,3 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/d0888ec1-d47a-4d5f-ac3a-a792accbf052
-
 ## Run Locally
 
 **Prerequisites:**  Node.js
@@ -15,6 +5,11 @@ View your app in AI Studio: https://ai.studio/apps/d0888ec1-d47a-4d5f-ac3a-a792a
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Set the `GEMINI_API_KEY` in [.env](.env) to your Gemini API key
+3. Set the `VITE_OPEN_WEATHER_API_KEY` in [.env](.env) to your OpenWeather API key
+4. Set the `VITE_AGRO_API_KEY` in [.env](.env) to your Agro API key
+5. Set the `VITE_API_URL` in [.env](.env) to your Vite API key
+6. Set the `DATABASE_URL` in [.env](.env) to your Database connection string
+7. Set the `JWT_SECRET` in [.env](.env) to your JWT Secret
+8. Run the app:
    `npm run dev`
