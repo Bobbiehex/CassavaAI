@@ -182,10 +182,10 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
   }, [timeframe, farmId]);
 
   const stats = [
-    { label: 'Total Area', value: displayArea, change: '+2.5%', icon: MapIcon, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-    { label: 'Active Drones', value: droneStats.value, change: droneStats.change, icon: Activity, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'Crop Health', value: '94%', change: '+1.2%', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-100' },
-    { label: 'Team Members', value: teamStats.value, change: teamStats.change, icon: Users, color: 'text-amber-600', bg: 'bg-amber-100' },
+    { labelId: 'stat_total_area', label: t('stat_total_area'), value: displayArea, change: '+2.5%', icon: MapIcon, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { labelId: 'stat_active_drones', label: t('stat_active_drones'), value: droneStats.value, change: droneStats.change, icon: Activity, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { labelId: 'stat_crop_health', label: t('stat_crop_health'), value: '94%', change: '+1.2%', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+    { labelId: 'stat_team_members', label: t('stat_team_members'), value: teamStats.value, change: teamStats.change, icon: Users, color: 'text-amber-600', bg: 'bg-amber-100' },
   ];
 
   return (
@@ -197,7 +197,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
             {t('nav_dashboard')}
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Welcome back to your agricultural command center.
+            {t('dashboard_welcome_subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -206,10 +206,10 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
             onChange={(e) => setTimeframe(e.target.value)}
             className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
+            <option value="7d">{t('tf_7d')}</option>
+            <option value="30d">{t('tf_30d')}</option>
+            <option value="month">{t('tf_month')}</option>
+            <option value="year">{t('tf_year')}</option>
           </select>
           <div className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2">
             <Calendar size={18} className="text-slate-400" />
@@ -238,7 +238,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               </div>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{stat.label}</p>
-            {stat.label === 'Total Area' ? (
+            {stat.labelId === 'stat_total_area' ? (
                 isEditingArea ? (
                   <form onSubmit={handleSaveArea} className="mt-1 flex gap-2">
                     <input autoFocus type="number" step="0.01" value={editAreaValue} onChange={e => setEditAreaValue(e.target.value)} className="w-20 px-2 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm outline-none" placeholder="Ha" />
@@ -264,12 +264,12 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Field Surveillance & NDVI</h2>
+              <h2 className="text-xl font-bold">{t('field_surveillance_ndvi')}</h2>
               <button 
                 onClick={() => onNavigate && onNavigate('crops')}
                 className="text-sm text-emerald-600 font-semibold hover:underline"
               >
-                View Map
+                {t('view_map')}
               </button>
             </div>
             <div className="aspect-video relative bg-slate-100 dark:bg-slate-900">
@@ -282,18 +282,17 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800 backdrop-blur p-3 rounded-xl shadow-lg border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">Optimal Health</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">{t('optimal_health')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">Action Required</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">{t('action_required')}</span>
                 </div>
               </div>
             </div>
             <div className="p-6">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Current NDVI analysis shows 85% of the cassava fields are in the optimal growth stage. 
-                Minor nitrogen deficiency detected in Sector B-4.
+                {t('field_ndvi_insight')}
               </p>
             </div>
           </div>
@@ -301,7 +300,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
               <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h3 className="font-bold">Cassava Disease Scanning</h3>
+                <h3 className="font-bold">{t('cassava_disease_scanning')}</h3>
               </div>
               <div className="aspect-[4/3] relative bg-slate-100 dark:bg-slate-900">
                 <img 
@@ -311,15 +310,15 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
                 <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                  <p className="text-xs font-medium text-emerald-300 mb-1">● AI Leaf Scanner</p>
-                  <p className="text-sm font-bold leading-tight">Continuous tracking of leaf health and mosaic symptoms. 124 leaves analyzed.</p>
+                  <p className="text-xs font-medium text-emerald-300 mb-1">● {t('ai_doctor')}</p>
+                  <p className="text-sm font-bold leading-tight">{t('continuous_tracking_leaves')}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
               <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h3 className="font-bold">Automated Drone Fleet</h3>
+                <h3 className="font-bold">{t('automated_drone_fleet')}</h3>
               </div>
               <div className="aspect-[4/3] relative bg-slate-100 dark:bg-slate-900">
                 <img 
@@ -332,8 +331,8 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                    <div className="w-4 h-4 bg-emerald-500 rounded-full absolute"></div>
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 bg-white/90 dark:bg-slate-800 backdrop-blur-sm p-3 rounded-xl z-20 border border-white/20 shadow-lg">
-                  <p className="text-xs font-bold text-slate-800 dark:text-white">Drone 04 Active</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Currently mapping topography and crop health in Sector C.</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">{t('drone_active')}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('drone_mapping_sector')}</p>
                 </div>
               </div>
             </div>
@@ -342,12 +341,12 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
           {/* Full Width Greenhouse Card */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Greenhouse Climate Control</h2>
+              <h2 className="text-xl font-bold">{t('greenhouse_climate_control')}</h2>
               <button 
                 onClick={() => onNavigate && onNavigate('settings')} 
                 className="text-sm text-emerald-600 font-semibold hover:underline"
               >
-                Adjust Settings
+                {t('adjust_settings')}
               </button>
             </div>
             <div className="relative bg-slate-100 dark:bg-slate-900 group">
@@ -358,11 +357,11 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               />
               <div className="absolute top-4 left-4 flex gap-2 z-20">
                 <span className="bg-emerald-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur shadow-sm">24°C</span>
-                <span className="bg-blue-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur shadow-sm">65% Humidity</span>
+                <span className="bg-blue-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur shadow-sm">65% {t('weather_humidity')}</span>
               </div>
               <div className="absolute bottom-6 left-6 right-6 bg-white/95 dark:bg-slate-800 backdrop-blur-md p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 xl:opacity-100 xl:group-hover:opacity-100">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Micro-climate analysis shows ideal conditions for premium crops. Maintaining current parameters will accelerate the flowering phase by an estimated 2 days.
+                  {t('greenhouse_insight_para')}
                 </p>
               </div>
             </div>
@@ -371,7 +370,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
               <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h3 className="font-bold">Soil Moisture Dynamics</h3>
+                <h3 className="font-bold">{t('soil_moisture_dynamics')}</h3>
               </div>
               <div className="aspect-[4/3] relative bg-slate-100 dark:bg-slate-900">
                 <img 
@@ -383,8 +382,8 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
                   <div className="flex justify-between items-end">
                     <div>
-                      <p className="text-xs font-medium text-blue-300 mb-1">Sensor Grid Alpha</p>
-                      <p className="text-sm font-bold leading-tight">Ideal moisture retained in deep root zones.</p>
+                      <p className="text-xs font-medium text-blue-300 mb-1">{t('sensor_grid_alpha')}</p>
+                      <p className="text-sm font-bold leading-tight">{t('ideal_moisture_retained')}</p>
                     </div>
                     <div className="bg-blue-500/80 backdrop-blur px-2 py-1 rounded-lg">
                       <p className="text-xs font-bold">42%</p>
@@ -396,7 +395,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
 
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col group">
               <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                <h3 className="font-bold">Autonomous Harvesters</h3>
+                <h3 className="font-bold">{t('autonomous_harvesters')}</h3>
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -411,16 +410,16 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md p-3 rounded-xl z-20 text-white border border-white/10">
                   <div className="flex justify-between items-center mb-1">
                     <p className="text-xs font-bold text-emerald-400">Harvester 02</p>
-                    <p className="text-[10px] font-medium bg-white/20 px-1.5 py-0.5 rounded">94% Efficiency</p>
+                    <p className="text-[10px] font-medium bg-white/20 px-1.5 py-0.5 rounded">94% {t('efficiency_label')}</p>
                   </div>
-                  <p className="text-xs text-slate-300">Fleet coordination active in northern cassava fields. Estimated completion in 3 hours.</p>
+                  <p className="text-xs text-slate-300">{t('harvester_fleet_coordination')}</p>
                 </div>
               </div>
             </div>
             
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col md:col-span-2">
               <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h3 className="font-bold">Crop Yield Forecasting</h3>
+                <h3 className="font-bold">{t('crop_yield_forecasting')}</h3>
               </div>
               <div className="aspect-[21/9] md:aspect-[3/1] relative bg-slate-100 dark:bg-slate-900">
                 <img 
@@ -431,7 +430,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/90 via-indigo-900/40 to-transparent z-10"></div>
                 <div className="absolute bottom-6 left-6 right-6 z-20">
                   <h4 className="text-4xl md:text-5xl font-bold text-white mb-2">+12%</h4>
-                  <p className="text-sm md:text-base font-medium text-indigo-100 max-w-lg">AI-driven multi-spectral forecast predicting an overall yield increase based on optimal meteorological data and current soil health.</p>
+                  <p className="text-sm md:text-base font-medium text-indigo-100 max-w-lg">{t('ai_driven_yield_forecast')}</p>
                 </div>
               </div>
             </div>
@@ -444,7 +443,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
           <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl p-8 text-white shadow-xl shadow-emerald-500/20">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-emerald-100 font-medium">Weather Forecast</p>
+                <p className="text-emerald-100 font-medium">{t('weather_forecast_card')}</p>
                 <h3 className="text-4xl font-bold mt-1">
                   {measurementUnit === 'imperial' 
                     ? Math.round((weather.temp * 9/5) + 32) + '°F'
@@ -462,14 +461,14 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               <div className="bg-white/10 backdrop-blur p-3 rounded-2xl">
                 <div className="flex items-center gap-2 text-emerald-100 mb-1">
                   <Droplets size={14} />
-                  <span className="text-xs font-medium">Humidity</span>
+                  <span className="text-xs font-medium">{t('weather_humidity')}</span>
                 </div>
                 <p className="font-bold">{weather.humidity}%</p>
               </div>
               <div className="bg-white/10 backdrop-blur p-3 rounded-2xl">
                 <div className="flex items-center gap-2 text-emerald-100 mb-1">
                   <Wind size={14} />
-                  <span className="text-xs font-medium">Wind</span>
+                  <span className="text-xs font-medium">{t('weather_wind')}</span>
                 </div>
                 <p className="font-bold">
                   {measurementUnit === 'imperial'
@@ -483,43 +482,43 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
           {/* Critical Alerts */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-              <h3 className="font-bold">Priority Alerts</h3>
+              <h3 className="font-bold">{t('priority_alerts')}</h3>
             </div>
             <div className="divide-y divide-slate-50 dark:divide-slate-700">
               {[
-                { title: 'Water Stress Detected', sector: 'Sector C-2', time: '10m ago', type: 'critical' },
-                { title: 'Cassava Mosaic Detected', sector: 'Field Alpha', time: '25m ago', type: 'warning' },
-                { title: 'Low Battery - Drone 04', sector: 'Hangar', time: '1h ago', type: 'info' },
+                { title: t('alert_water_stress'), sector: 'Sector C-2', time: '10m ago', type: 'critical' },
+                { title: t('alert_mosaic'), sector: 'Field Alpha', time: '25m ago', type: 'warning' },
+                { title: t('alert_drone_battery'), sector: 'Hangar', time: '1h ago', type: 'info' },
               ].map((alert, i) => (
                 <div key={i} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      alert.type === 'critical' ? 'bg-rose-500' : 
-                      alert.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
-                    }`}></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold">{alert.title}</p>
-                      <p className="text-xs text-slate-500">{alert.sector} • {alert.time}</p>
-                    </div>
+                     <div className={`w-2 h-2 rounded-full ${
+                       alert.type === 'critical' ? 'bg-rose-500' : 
+                       alert.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+                     }`}></div>
+                     <div className="flex-1">
+                       <p className="text-sm font-bold">{alert.title}</p>
+                       <p className="text-xs text-slate-500">{alert.sector} • {alert.time}</p>
+                     </div>
                   </div>
                 </div>
               ))}
             </div>
             <button className="w-full p-4 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border-t border-slate-100 dark:border-slate-700">
-              View All Alerts
+              {t('view_all_alerts')}
             </button>
           </div>
 
           {/* Quick Actions */}
           <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
-            <h3 className="font-bold mb-4">Quick Actions</h3>
+            <h3 className="font-bold mb-4">{t('quick_actions')}</h3>
             <div className="space-y-3">
               <button className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-sm transition-colors flex items-center justify-between group">
-                Launch Drone Scan
+                {t('launch_drone_scan')}
                 <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </button>
               <button className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-sm transition-colors flex items-center justify-between group">
-                Generate Report
+                {t('generate_report_btn')}
                 <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </button>
             </div>
@@ -527,11 +526,11 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
 
           {/* Resource Status */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            <h3 className="font-bold mb-6 text-slate-900 dark:text-white">Resource Consumption</h3>
+            <h3 className="font-bold mb-6 text-slate-900 dark:text-white">{t('resource_consumption')}</h3>
             <div className="space-y-5">
               <div>
                 <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-500 dark:text-slate-400">Water Storage</span>
+                  <span className="text-slate-500 dark:text-slate-400">{t('water_storage')}</span>
                   <span className="text-emerald-600 font-bold">78%</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden flex">
@@ -542,7 +541,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               </div>
               <div>
                 <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-500 dark:text-slate-400">Solar Energy Grid</span>
+                  <span className="text-slate-500 dark:text-slate-400">{t('solar_energy_grid')}</span>
                   <span className="text-amber-500 font-bold">92%</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden flex">
@@ -553,38 +552,38 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
               </div>
               <div>
                 <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-500 dark:text-slate-400">Fertilizer Silos</span>
+                  <span className="text-slate-500 dark:text-slate-400">{t('fertilizer_silos')}</span>
                   <span className="text-blue-500 font-bold">45%</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden flex">
                   <div className="bg-blue-500 h-2.5 rounded-full w-[45%]"></div>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">Restock recommended in 4 days.</p>
+                <p className="text-xs text-slate-500 mt-2">{t('restock_recommended')}</p>
               </div>
             </div>
           </div>
           
           {/* Active Operations Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            <h3 className="font-bold mb-6 text-slate-900 dark:text-white">Live Operations</h3>
+            <h3 className="font-bold mb-6 text-slate-900 dark:text-white">{t('live_operations')}</h3>
             <div className="relative border-l-2 border-slate-100 dark:border-slate-700 ml-3 space-y-6">
               <div className="relative pl-6">
                 <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-slate-800"></span>
-                <p className="text-xs font-bold text-emerald-600 mb-1">IN PROGRESS</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Sector 4 Irrigation</p>
-                <p className="text-xs text-slate-500 mt-0.5">Automated drip system running for remaining 2 hours.</p>
+                <p className="text-xs font-bold text-emerald-600 mb-1">{t('in_progress_label')}</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t('sector_4_irrigation')}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{t('automated_drip_running')}</p>
               </div>
               <div className="relative pl-6">
                 <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-white dark:ring-slate-800"></span>
-                <p className="text-xs font-bold text-amber-600 mb-1">UPCOMING (14:00)</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Soil Sampling Drone</p>
-                <p className="text-xs text-slate-500 mt-0.5">Pre-flight checks completed. Awaiting schedule.</p>
+                <p className="text-xs font-bold text-amber-600 mb-1">{t('upcoming_label')} (14:00)</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t('soil_sampling_drone')}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{t('preflight_checks_completed')}</p>
               </div>
               <div className="relative pl-6">
                 <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-600 ring-4 ring-white dark:ring-slate-800"></span>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">SCHEDULED (16:30)</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Cassava Irrigation</p>
-                <p className="text-xs text-slate-500 mt-0.5">Automated drip system scheduling for Sector A.</p>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('scheduled_label')} (16:30)</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t('cassava_irrigation_action')}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{t('automated_drip_sector_a')}</p>
               </div>
             </div>
           </div>
@@ -597,8 +596,8 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <p className="text-indigo-100 font-medium text-sm">Eco-Efficiency Rating</p>
-                  <h3 className="text-2xl font-bold mt-1">Excellent</h3>
+                  <p className="text-indigo-100 font-medium text-sm">{t('eco_efficiency_rating')}</p>
+                  <h3 className="text-2xl font-bold mt-1">{t('eco_excellent')}</h3>
                 </div>
                 <div className="bg-white/20 backdrop-blur-md rounded-xl p-2">
                   <TrendingUp size={20} className="text-white" />
@@ -628,7 +627,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 <div className="flex-1 space-y-2">
                   <div>
                     <div className="flex justify-between text-[10px] text-indigo-100 mb-1">
-                      <span>Carbon Offset</span>
+                      <span>{t('carbon_offset')}</span>
                       <span>+12%</span>
                     </div>
                     <div className="w-full bg-white/20 rounded-full h-1.5">
@@ -637,7 +636,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-indigo-100 mb-1">
-                      <span>Water Recycled</span>
+                      <span>{t('water_recycled')}</span>
                       <span>88%</span>
                     </div>
                     <div className="w-full bg-white/20 rounded-full h-1.5">
@@ -651,15 +650,15 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
 
           {/* Supply Chain Logistics */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            <h3 className="font-bold mb-4 text-slate-900 dark:text-white">Active Dispatch Logs</h3>
+            <h3 className="font-bold mb-4 text-slate-900 dark:text-white">{t('active_dispatch_logs')}</h3>
             <div className="space-y-4">
               <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-slate-600">
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-800 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0">
                   <ArrowUpRight size={18} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Outgoing: Organic Cassava</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Fleet 04 • En route to distribution center (ETA 45m)</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('outgoing_organic_cassava')}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('fleet_en_route')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-slate-600">
@@ -667,13 +666,13 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                   <ArrowDownRight size={18} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Incoming: Bio-Fertilizer</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Supplier delivery expected at 14:30 today.</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('incoming_bio_fertilizer')}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('supplier_delivery_expected')}</p>
                 </div>
               </div>
             </div>
             <button className="w-full mt-4 p-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700">
-              View Full Logistics Map
+              {t('view_logistics_map')}
             </button>
           </div>
 

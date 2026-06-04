@@ -3,6 +3,7 @@ import { Send, CheckCircle, Clock, AlertTriangle, MessageCircle, Server, Search,
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { createSupportBotSession, sendChatMessage } from '../services/geminiService';
+import { useLanguage } from '../context/LanguageContext';
 import type { Chat } from '@google/genai';
 import { AccountProfileGuideModal } from './AccountProfileGuideModal';
 import { PrivacySecurityGuideModal } from './PrivacySecurityGuideModal';
@@ -14,6 +15,7 @@ import { Shield as ShieldIcon, Lock } from 'lucide-react';
 
 export const SupportCenterPage: React.FC = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'TICKETS' | 'TEAM_CHAT'>('TICKETS');
   
   // Ticket State
@@ -97,9 +99,19 @@ export const SupportCenterPage: React.FC = () => {
     setIsChatOpen(true);
     setIsChatMinimized(false);
     if (!chatSession) {
-      const session = createSupportBotSession();
+      const mappedLang = language === 'yo' ? 'Yoruba' : language === 'ha' ? 'Hausa' : language === 'ig' ? 'Igbo' : 'English';
+      const session = createSupportBotSession(mappedLang);
       setChatSession(session);
-      setChatMessages([{ role: 'bot', text: `Hi ${user?.name}, I'm the Agrivision Support Bot. How can I help you today?` }]);
+      
+      const greetings = {
+        en: `Hi ${user?.name || 'there'}, I'm the Agrivision Support Bot. How can I help you today?`,
+        yo: `Káàbọ̀ ${user?.name || 'there'}, Èmi ni Agrivision Support Bot. Báwo ni mo ṣe lè tì ọ́ lẹ́yìn lónìí?`,
+        ha: `Sannu ${user?.name || 'there'}, Ni ne Agrivision Support Bot. Ta yaya zan iya taimaka muku a yau?`,
+        ig: `Ndewọ ${user?.name || 'there'}, Abụ m Agrivision Support Bot. Kedu ka m ga-esi nyere gị aka taa?`
+      };
+      
+      const greetingText = greetings[language] || greetings['en'];
+      setChatMessages([{ role: 'bot', text: greetingText }]);
     }
   };
 

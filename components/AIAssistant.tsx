@@ -5,6 +5,7 @@ import { createChatSession, sendChatMessage } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { ApiService } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import { Language } from '../translations';
 
 interface AIAssistantProps {
   farmId: string | null;
@@ -19,9 +20,59 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const { language } = useLanguage();
 
+  const uistrings: Record<Language, {
+    title: string;
+    powered: string;
+    you: string;
+    advisor: string;
+    thinking: string;
+    placeholder: string;
+    welcome: string;
+  }> = {
+    en: {
+      title: "AI Cassava Advisor",
+      powered: "Powered by Gemini 2.5 Flash • History Saved",
+      you: "You",
+      advisor: "CassavaBot",
+      thinking: "Thinking...",
+      placeholder: "Ask about cassava mosaic disease, stem cutting prep, irrigation...",
+      welcome: "Hello! I am CassavaBot, your AI Cassava Advisor. How can I assist you with your cassava fields today? I can help with leaf disease detection, stem cuttings, fertilizer, or soil wellness."
+    },
+    yo: {
+      title: "Olùdámọ̀ràn AI Gbáàgúdá",
+      powered: "Alagbara nipasẹ Gemini 2.5 Flash • Itan n pamọ",
+      you: "Iwọ",
+      advisor: "CassavaBot",
+      thinking: "O n ronu...",
+      placeholder: "Beere nipa arun mosaic gbaaguda, igbaradi gbingbin gbaaguda, irigeson...",
+      welcome: "Káàbọ̀! Èmi ni CassavaBot, Olùdámọ̀ràn AI Gbáàgúdá rẹ. Báwo ni mo ṣe lè ràn ọ́ lọ́wọ́ pẹ̀lú àwọn oko gbáàgúdá rẹ lónìí? Mo lè ràn ọ́ lọ́wọ́ pẹ̀lú mímọ àrùn ewé, gbingbin igi gbáàgúdá, ajílẹ̀, tàbí ìlera ilẹ̀-alẹ̀."
+    },
+    ha: {
+      title: "Mai Ba da Shawara kan Rogo na AI",
+      powered: "An yi amfani da Gemini 2.5 Flash • Tarihi na adana",
+      you: "Kai",
+      advisor: "CassavaBot",
+      thinking: "Yana tunani...",
+      placeholder: "Tambayi game da cutar mosaic rogo, dashen rogo, ban ruwa...",
+      welcome: "Sannu! Ni ne CassavaBot, Mai ba da shawara kan Rogo na AI. Ta yaya zan iya taimaka muku game da gonakin rogo a yau? Zan iya taimaka muku wajen gano cututtukan ganye, dasa rogo, taki, ko lafiyar ƙasa."
+    },
+    ig: {
+      title: "Onye Ndụmọdụ AI Akpụ",
+      powered: "Ihe rụpụtara site na Gemini 2.5 Flash • Edere Akụkọ",
+      you: "Gị",
+      advisor: "CassavaBot",
+      thinking: "O na-eche echiche...",
+      placeholder: "Jụọ maka ọrịa mosaic akpụ, njikere oke akpụ, mmiri abụọ...",
+      welcome: "Ndewọ! Abụ m CassavaBot, Onye ndụmọdụ AI Akpụ gị. Kedu ka m ga-esi nyere gị aka na ubi akpụ gị taa? Enwere m ike inyere gị aka chọpụta ọrịa akwụkwọ akpụ, oke akpụ, fatịlaịza, ma ọ bụ ahụike ala gị."
+    }
+  };
+
+  const strings = uistrings[language] || uistrings['en'];
+
   // Initialize session on language change
   useEffect(() => {
-    chatSessionRef.current = createChatSession(language);
+    const mappedLang = language === 'yo' ? 'Yoruba' : language === 'ha' ? 'Hausa' : language === 'ig' ? 'Igbo' : 'English';
+    chatSessionRef.current = createChatSession(mappedLang);
   }, [language]);
 
   // Load history from DB
@@ -40,7 +91,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
           // Default welcome message if empty
           const welcomeMsg = {
             role: 'model',
-            text: 'Hello! I am CassavaBot, your AI Cassava Advisor. How can I assist you with your cassava fields today? I can help with leaf disease detection, stem cuttings, fertilizer, or soil wellness.',
+            text: strings.welcome,
           };
           const savedMsg = await ApiService.saveChatMessage({
             farmId: farmId || undefined,
@@ -61,7 +112,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
       }
     };
     loadHistory();
-  }, [farmId]);
+  }, [farmId, strings.welcome]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -135,9 +186,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
         <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                 <Bot className="text-emerald-600" />
-                AI Cassava Advisor
+                {strings.title}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Powered by Gemini 3.1 Pro • History Saved</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{strings.powered}</p>
         </div>
       </div>
 
@@ -161,7 +212,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
                     `}>
                     <div className="flex items-center gap-2 mb-1 opacity-75 text-xs">
                         {msg.role === 'user' ? <User size={12} /> : <Bot size={12} />}
-                         <span>{msg.role === 'user' ? 'You' : 'CassavaBot'}</span>
+                         <span>{msg.role === 'user' ? strings.you : strings.advisor}</span>
                     </div>
                     <div className="whitespace-pre-wrap leading-relaxed text-sm">
                         {msg.text}
@@ -173,7 +224,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
                     <div className="flex justify-start">
                         <div className="bg-slate-100 dark:bg-slate-700 rounded-2xl rounded-tl-none p-4 flex items-center gap-2 text-slate-500 dark:text-slate-300 text-sm">
                             <Loader2 size={16} className="animate-spin" />
-                            Thinking...
+                            {strings.thinking}
                         </div>
                     </div>
                 )}
@@ -189,7 +240,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ farmId }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask about cassava mosaic disease, stem cutting prep, irrigation..."
+            placeholder={strings.placeholder}
             className="flex-1 border border-slate-200 dark:border-slate-600 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
             disabled={isLoading}
           />

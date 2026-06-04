@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Leaf, Mail, Lock, ArrowRight, Loader2, User, Shield, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 export const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -17,6 +18,7 @@ export const RegisterPage: React.FC = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +51,7 @@ export const RegisterPage: React.FC = () => {
         const geoData = await geoRes.json();
         location = `${geoData.city || 'Unknown City'}, ${geoData.region || geoData.country_name || 'Unknown Region'}`;
       } catch (e) {
-        console.error("Failed to fetch location", e);
+        console.warn("Failed to fetch location gracefully (non-critical):", e);
       }
 
       const API_BASE_URL = getApiBaseUrl();
@@ -82,8 +84,8 @@ export const RegisterPage: React.FC = () => {
           <div className="inline-flex items-center justify-center mb-6">
             <img src="/logo.png" alt="AgriVision Logo" className="w-20 h-20 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Join Agrivision</h1>
-          <p className="text-slate-500 dark:text-slate-400">Create your account to access advanced agricultural AI.</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('register_title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('register_subtitle')}</p>
         </div>
 
         {/* Form Card */}
@@ -96,7 +98,7 @@ export const RegisterPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Full Name</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('register_name')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <User size={20} />
@@ -113,7 +115,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Email Address</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('login_email')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Mail size={20} />
@@ -130,7 +132,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Phone Number</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('register_phone')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Phone size={20} />
@@ -140,14 +142,14 @@ export const RegisterPage: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+234..."
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Role</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('register_role')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Shield size={20} />
@@ -157,15 +159,15 @@ export const RegisterPage: React.FC = () => {
                   onChange={(e) => setRole(e.target.value as any)}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none cursor-pointer"
                 >
-                  <option value="FARMER">Farmer (User)</option>
-                  <option value="ADMIN">Admin</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="FARMER">{t('register_role_farmer')}</option>
+                  <option value="ADMIN">{t('register_role_admin')}</option>
+                  <option value="SUPER_ADMIN">{t('register_role_super_admin')}</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Password</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('login_password')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Lock size={20} />
@@ -183,7 +185,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Confirm Password</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('register_confirm_password')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Lock size={20} />
@@ -209,7 +211,7 @@ export const RegisterPage: React.FC = () => {
                 <Loader2 size={20} className="animate-spin" />
               ) : (
                 <>
-                  Create Account
+                  {t('register_btn')}
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -217,9 +219,9 @@ export const RegisterPage: React.FC = () => {
           </form>
 
           <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            Already have an account?{' '}
+            {t('register_have_account')}{' '}
             <Link to="/login" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-              Log in instead
+              {t('register_login_now')}
             </Link>
           </div>
         </div>

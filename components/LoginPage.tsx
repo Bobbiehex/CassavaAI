@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Leaf, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ export const LoginPage: React.FC = () => {
         const geoData = await geoRes.json();
         location = `${geoData.city || 'Unknown City'}, ${geoData.region || geoData.country_name || 'Unknown Region'}`;
       } catch (e) {
-        console.error("Failed to fetch location", e);
+        console.warn("Failed to fetch location gracefully (non-critical):", e);
       }
 
       const API_BASE_URL = getApiBaseUrl();
@@ -60,8 +62,8 @@ export const LoginPage: React.FC = () => {
           <div className="inline-flex items-center justify-center mb-6">
             <img src="/logo.png" alt="AgriVision Logo" className="w-20 h-20 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-500 dark:text-slate-400">Sign in to your Agrivision command center.</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('login_welcome_back')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('login_subtitle')}</p>
         </div>
 
         {/* Form Card */}
@@ -74,7 +76,7 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Email Address</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('login_email')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Mail size={20} />
@@ -91,7 +93,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-900 dark:text-white">Password</label>
+              <label className="text-sm font-bold text-slate-900 dark:text-white">{t('login_password')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Lock size={20} />
@@ -116,7 +118,7 @@ export const LoginPage: React.FC = () => {
                 <Loader2 size={20} className="animate-spin" />
               ) : (
                 <>
-                  Sign In
+                  {t('login_btn')}
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -124,9 +126,9 @@ export const LoginPage: React.FC = () => {
           </form>
 
           <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            Don't have an account?{' '}
+            {t('login_no_account')}{' '}
             <Link to="/register" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-              Register now
+              {t('login_register_now')}
             </Link>
           </div>
         </div>
