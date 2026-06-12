@@ -1,6 +1,18 @@
 export const getApiBaseUrl = () => {
-  const url = import.meta.env.VITE_API_URL;
+  let url = import.meta.env.VITE_API_URL;
   
+  if (url) {
+    // Clean and sanitize any accidental trailing fragment hash (#) or query strings (?)
+    const hashIndex = url.indexOf('#');
+    if (hashIndex !== -1) {
+      url = url.substring(0, hashIndex);
+    }
+    const queryIndex = url.indexOf('?');
+    if (queryIndex !== -1) {
+      url = url.substring(0, queryIndex);
+    }
+  }
+
   // If we are in the browser and the current page is not localhost,
   // we must avoid hitting a hardcoded localhost API URL.
   if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
