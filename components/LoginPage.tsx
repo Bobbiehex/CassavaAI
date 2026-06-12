@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center mb-6">
-            <img src="/logo.png" alt="AgriVision Logo" className="w-20 h-20 object-contain" />
+            <img src="/logo.png" alt="Cassava Doctor Logo" className="w-20 h-20 object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('login_welcome_back')}</h1>
           <p className="text-slate-500 dark:text-slate-400">{t('login_subtitle')}</p>

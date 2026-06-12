@@ -11,6 +11,7 @@ export interface TranslationKeys {
   nav_about: string;
   nav_blog: string;
   nav_settings: string;
+  nav_map: string;
   farm_overview: string;
   weather_humidity: string;
   weather_wind: string;
@@ -174,6 +175,7 @@ const enTranslations: TranslationKeys = {
     nav_about: "About Us",
     nav_blog: "Blog",
     nav_settings: "Settings",
+    nav_map: "Geospatial Tracker",
 
     // Overview
     farm_overview: "Farm Overview",
@@ -252,14 +254,14 @@ const enTranslations: TranslationKeys = {
 
     // Login & Register
     login_welcome_back: "Welcome Back",
-    login_subtitle: "Sign in to your Agrivision command center.",
+    login_subtitle: "Sign in to your Cassava Doctor command center.",
     login_email: "Email Address",
     login_password: "Password",
     login_btn: "Sign In",
     login_no_account: "Don't have an account?",
     login_register_now: "Register now",
     register_title: "Create Account",
-    register_subtitle: "Join the Agrivision farming community.",
+    register_subtitle: "Join the Cassava Doctor farming community.",
     register_name: "Full Name",
     register_phone: "Phone Number",
     register_confirm_password: "Confirm Password",
@@ -348,6 +350,7 @@ const yoTranslations: TranslationKeys = {
     nav_about: "Nipa Wa",
     nav_blog: "Blog",
     nav_settings: "Ètò",
+    nav_map: "Maapu Oko",
 
     // Overview
     farm_overview: "Atunwo Oko",
@@ -426,14 +429,14 @@ const yoTranslations: TranslationKeys = {
 
     // Login & Register
     login_welcome_back: "Káàbọ̀ Padà",
-    login_subtitle: "Wọlé si Agrivision rẹ lati bẹrẹ.",
+    login_subtitle: "Wọlé si Cassava Doctor rẹ lati bẹrẹ.",
     login_email: "Adirẹsi Imeeli",
     login_password: "Ọrọigbaniwọle",
     login_btn: "Wọlé",
     login_no_account: "Ṣe o ko ni akọọlẹ?",
     login_register_now: "Forukọsilẹ bayi",
     register_title: "Ṣẹda Akọọlẹ Tuntun",
-    register_subtitle: "Darapọ mọ agbegbe agbe Agrivision.",
+    register_subtitle: "Darapọ mọ agbegbe agbe Cassava Doctor.",
     register_name: "Orukọ Kikun",
     register_phone: "Nọmba Tẹlifoonu",
     register_confirm_password: "Fidi Ọrọigbaniwọle Mule",
@@ -522,6 +525,7 @@ const haTranslations: TranslationKeys = {
     nav_about: "Game da Mu",
     nav_blog: "Bulog",
     nav_settings: "Saituna",
+    nav_map: "Taswirar Gona",
 
     // Overview
     farm_overview: "Bayanin Gona",
@@ -600,14 +604,14 @@ const haTranslations: TranslationKeys = {
 
     // Login & Register
     login_welcome_back: "Sannu da Dawowa",
-    login_subtitle: "Shiga cikin cibiyar sarrafa Agrivision ɗin ku.",
+    login_subtitle: "Shiga cikin cibiyar sarrafa Cassava Doctor ɗin ku.",
     login_email: "Adireshin Imel",
     login_password: "Kalmar Sirri",
     login_btn: "Shiga",
     login_no_account: "Ba ku da asusu?",
     login_register_now: "Rijista yanzu",
     register_title: "Ƙirƙiri Asusun",
-    register_subtitle: "Kasance cikin ƙungiyar manoman Agrivision.",
+    register_subtitle: "Kasance cikin ƙungiyar manoman Cassava Doctor.",
     register_name: "Cikakken Suna",
     register_phone: "Lambar Waya",
     register_confirm_password: "Tabbatar da Kalmar Sirri",
@@ -696,6 +700,7 @@ const igTranslations: TranslationKeys = {
     nav_about: "Maka Anyị",
     nav_blog: "Blọgụ",
     nav_settings: "Nhazi",
+    nav_map: "Ihe Ọgụgụ Map Ugbo",
 
     // Overview
     farm_overview: "Nchịkọta Ugbo",
@@ -774,14 +779,14 @@ const igTranslations: TranslationKeys = {
 
     // Login & Register
     login_welcome_back: "Nnọọ nlaghachi",
-    login_subtitle: "Banye n'ime ebe nchịkwa Agrivision gị.",
+    login_subtitle: "Banye n'ime ebe nchịkwa Cassava Doctor gị.",
     login_email: "Adreesị ozi-e",
     login_password: "Okwu nzuzo",
     login_btn: "Banye",
     login_no_account: "Ị nweghị akaụntụ?",
     login_register_now: "Debanye aha ugbu a",
     register_title: "Mepụta Akaụntụ",
-    register_subtitle: "Soro ndị otu ugbo Agrivision.",
+    register_subtitle: "Soro ndị otu ugbo Cassava Doctor.",
     register_name: "Aha zuru oke",
     register_phone: "Nọmba ekwentị",
     register_confirm_password: "Tabbatar agbakwunyere okwu nzuzo",

@@ -20,7 +20,8 @@ import {
   ChevronRight,
   BookOpen,
   Headset,
-  Shield
+  Shield,
+  Map
 } from 'lucide-react';
 import { useNotifications, Toast } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -104,6 +105,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
     { id: 'dashboard', label: t('nav_dashboard'), icon: LayoutDashboard },
     { id: 'overview', label: t('nav_overview'), icon: BarChart3 },
     { id: 'crops', label: t('nav_crops'), icon: Sprout },
+    { id: 'map', label: t('nav_map'), icon: Map },
     { id: 'ai-advisor', label: t('nav_advisor'), icon: MessageSquareText },
     { id: 'support', label: 'Support Center', icon: Headset },
     ...(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? [

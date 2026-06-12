@@ -23,6 +23,7 @@ import { dbService } from './services/db';
 import { ApiService } from './services/api';
 
 import { NoFarmPrompt } from './components/NoFarmPrompt';
+import { FarmMapPage } from './components/FarmMapPage';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -83,7 +84,7 @@ const App: React.FC = () => {
   };
 
   const renderPage = () => {
-    const needsFarm = ['dashboard', 'overview', 'crops', 'ai-advisor'].includes(currentPage);
+    const needsFarm = ['dashboard', 'overview', 'crops', 'map', 'ai-advisor'].includes(currentPage);
     
     if (needsFarm && !selectedFarmId) {
       return <NoFarmPrompt />;
@@ -93,6 +94,7 @@ const App: React.FC = () => {
       case 'dashboard': return <DashboardPage farmId={selectedFarmId} onNavigate={handleNavigate} />;
       case 'overview': return <OverviewDashboard farmId={selectedFarmId} />;
       case 'crops': return <CropDashboard initialCropId={navParams?.id} farmId={selectedFarmId} />;
+      case 'map': return <FarmMapPage />;
       case 'ai-advisor': return <AIAssistant farmId={selectedFarmId} />;
       case 'support': return <SupportCenterPage />;
       case 'blog': return <BlogPage />;

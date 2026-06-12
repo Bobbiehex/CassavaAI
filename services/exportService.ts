@@ -50,7 +50,7 @@ export const ExportService = {
     // Header / Title
     doc.setFontSize(22);
     doc.setTextColor(16, 185, 129); // Emerald-500
-    doc.text("AgriVision AI Report", margin, margin);
+    doc.text("Cassava Doctor AI Report", margin, margin);
     
     doc.setFontSize(14);
     doc.setTextColor(60, 60, 60);
@@ -133,7 +133,7 @@ export const ExportService = {
     // Footer
     doc.setFontSize(8);
     doc.setTextColor(200, 200, 200);
-    doc.text("AgriVision AI Platform - Automated Analysis Report", margin, pageHeight - 10);
+    doc.text("Cassava Doctor AI Platform - Automated Analysis Report", margin, pageHeight - 10);
 
     // Save to DB
     const report: Report = {
@@ -147,7 +147,7 @@ export const ExportService = {
     };
     await dbService.saveReport(report);
 
-    doc.save(`AgriVision_Report_${Date.now()}.pdf`);
+    doc.save(`Cassava_Doctor_Report_${Date.now()}.pdf`);
     return report;
   },
 

@@ -92,8 +92,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ farmId }) 
           
           // Use farm coordinates if lat/lon not explicitly provided
           if (!lat && !lon && dbFarm.coordinates) {
-            lat = dbFarm.coordinates.lat;
-            lon = dbFarm.coordinates.lon;
+            try {
+              const rawCoords = typeof dbFarm.coordinates === 'string' ? JSON.parse(dbFarm.coordinates) : dbFarm.coordinates;
+              if (rawCoords && typeof rawCoords === 'object') {
+                lat = typeof rawCoords.lat === 'number' ? rawCoords.lat : (typeof rawCoords.latitude === 'number' ? rawCoords.latitude : undefined);
+                lon = typeof rawCoords.lng === 'number' ? rawCoords.lng : (typeof rawCoords.lon === 'number' ? rawCoords.lon : (typeof rawCoords.longitude === 'number' ? rawCoords.longitude : undefined));
+              }
+            } catch (err) {
+              console.error("Error parsing farm coordinates in overview:", err);
+            }
           }
           
           if (dbFarm.manualMetrics) {
