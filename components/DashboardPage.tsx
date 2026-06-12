@@ -20,13 +20,13 @@ import {
   Activity
 } from 'lucide-react';
 
-import image from '../src/assets/image.png';
-import image1 from '../src/assets/image1.png';
+import image from '../src/assets/images/cassava_ndvi_map_1781272296202.jpg';
+import image1 from '../src/assets/images/cassava_scanning_1781272316688.jpg';
 import image2 from '../src/assets/image2.png';
 import image3 from '../src/assets/image3.png';
-import image4 from '../src/assets/image4.png';
+import image4 from '../src/assets/images/greenhouse_climate_1781272331937.jpg';
 import image5 from '../src/assets/image5.png';
-import image6 from '../src/assets/image6.png';
+import image6 from '../src/assets/images/yield_forecast_1781272347670.jpg';
 
 export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (page: string, params?: any) => void }> = ({ farmId, onNavigate }) => {
   const { t, dir } = useLanguage();
@@ -278,6 +278,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 src={image} 
                 alt="Field Map" 
                 className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800 backdrop-blur p-3 rounded-xl shadow-lg border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
@@ -307,6 +308,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                   src={image1} 
                   alt="Cassava Scanning" 
                   className="w-full h-full object-cover relative z-0"
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
                 <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
@@ -354,6 +356,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                 src={image4} 
                 alt="Greenhouse" 
                 className="w-full h-auto object-contain block"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute top-4 left-4 flex gap-2 z-20">
                 <span className="bg-emerald-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur shadow-sm">24°C</span>
@@ -426,6 +429,7 @@ export const DashboardPage: React.FC<{ farmId?: string | null, onNavigate?: (pag
                   src={image6} 
                   alt="Yield Forecast" 
                   className="w-full h-full object-cover relative z-0"
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/90 via-indigo-900/40 to-transparent z-10"></div>
                 <div className="absolute bottom-6 left-6 right-6 z-20">
