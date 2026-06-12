@@ -61,16 +61,21 @@ export const RegisterPage: React.FC = () => {
         body: JSON.stringify({ name, email, password, role, phone, location }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        throw new Error(`Server returned status ${res.status}: ${res.statusText || 'Unable to parse JSON response. Please make sure the database setup and environment variables are healthy.'}`);
+      }
 
       if (res.ok) {
         login(data.token, data.user);
         navigate('/'); // Redirect to dashboard
       } else {
-        setError(data.error || 'Registration failed');
+        setError(data.error || `Registration failed (Status ${res.status})`);
       }
-    } catch (err) {
-      setError('Network error. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'Network error. Please try again.');
     } finally {
       setIsLoading(false);
     }
