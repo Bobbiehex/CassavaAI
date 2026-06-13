@@ -15,7 +15,10 @@ import {
   ThermometerSun,
   Eye,
   Maximize2,
-  Palette
+  Palette,
+  Camera,
+  Image,
+  X
 } from 'lucide-react';
 import EXIF from 'exif-js';
 import html2canvas from 'html2canvas';
@@ -62,6 +65,16 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AIAnalysisResult | null>(null);
   
+  // Camera Selection & Real-time Viewfinder State
+  const [showUploadSourceModal, setShowUploadSourceModal] = useState(false);
+  const [showLiveCameraModal, setShowLiveCameraModal] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraDevices, setCameraDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string>('');
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const nativeCameraInputRef = useRef<HTMLInputElement>(null);
+  
   // Map / Drone State
   const [mapImage, setMapImage] = useState<string>("https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"); // Default placeholder
   const [overlayType, setOverlayType] = useState<OverlayType>('NONE');
@@ -85,6 +98,7 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
   const [draggingThreshold, setDraggingThreshold] = useState<'healthy' | 'warning' | null>(null);
 
   const [showAddCropModal, setShowAddCropModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [newCropData, setNewCropData] = useState({ name: '', type: '', fieldId: '', plantingDate: '' });
 
   const handleAddCrop = async () => {
@@ -310,8 +324,95 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
     }
   };
 
-  const triggerUpload = () => fileInputRef.current?.click();
+  const triggerUpload = () => setShowUploadSourceModal(true);
+  const triggerDeviceUpload = () => fileInputRef.current?.click();
+  const triggerNativeCamera = () => nativeCameraInputRef.current?.click();
   const triggerMapUpload = () => mapInputRef.current?.click();
+
+  const startCamera = async (deviceId?: string) => {
+    setCameraError(null);
+    setShowLiveCameraModal(true);
+    try {
+      const constraints: MediaStreamConstraints = {
+        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: 'environment' } }
+      };
+      
+      // Stop any existing stream
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setCameraDevices(videoDevices);
+      
+      if (!deviceId && videoDevices.length > 0) {
+        const activeTrack = stream.getVideoTracks()[0];
+        const settings = activeTrack ? activeTrack.getSettings() : null;
+        if (settings && settings.deviceId) {
+          setSelectedCameraId(settings.deviceId);
+        } else {
+          setSelectedCameraId(videoDevices[0].deviceId);
+        }
+      } else if (deviceId) {
+        setSelectedCameraId(deviceId);
+      }
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      setCameraError("Unable to access camera. Please make sure that you grant camera permissions or use the Native Camera fallback instead.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowLiveCameraModal(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && cameraStream) {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        setAnalysisImage(dataUrl);
+        setAnalysisResult(null);
+        
+        // Stop stream
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+        setShowLiveCameraModal(false);
+        setShowUploadSourceModal(false);
+        
+        ApiService.saveImage(`analysis-${Date.now()}`, 'CROP', dataUrl);
+        addNotification({
+          title: 'Photo Captured',
+          message: 'Real-time leaf photo captured successfully.',
+          type: 'SUCCESS'
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
 
   const runAnalysis = async () => {
     if (!analysisImage) return;
@@ -364,17 +465,77 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
   };
 
   const handleExportData = () => {
+    setShowExportModal(true);
+  };
+
+  const handleExportHistoricalReports = () => {
+    if (!reports || reports.length === 0) {
+      addNotification({ 
+        title: 'No reports found', 
+        message: 'There are no historical reports available to export.', 
+        type: 'WARNING' 
+      });
+      return;
+    }
+    
+    const formattedReports = reports.map(r => ({
+      ID: r.id,
+      Type: r.type,
+      Title: r.title,
+      Summary: r.summary,
+      Date: new Date(r.timestamp).toLocaleString(),
+      DetectedSubject: r.details?.detectedSubject || 'N/A',
+      Condition: r.details?.condition || 'N/A',
+      Confidence: r.details?.confidence ? `${r.details.confidence}%` : 'N/A',
+      Issues: Array.isArray(r.details?.issues) ? r.details.issues.join('; ') : 'N/A',
+      Recommendations: Array.isArray(r.details?.recommendations) ? r.details.recommendations.join('; ') : 'N/A'
+    }));
+
+    ExportService.exportToCSV(formattedReports, `historical_reports_export_${Date.now()}.csv`);
+    addNotification({ 
+      title: 'Success', 
+      message: 'Historical reports exported as CSV successfully.', 
+      type: 'SUCCESS' 
+    });
+    setShowExportModal(false);
+  };
+
+  const handleExportKeyInsights = () => {
+    if (!displayedCrops || displayedCrops.length === 0) {
+      addNotification({ 
+        title: 'No fields found', 
+        message: 'There is no crop field data available to export.', 
+        type: 'WARNING' 
+      });
+      return;
+    }
+
     const dataToExport = displayedCrops.map(c => ({
         ID: c.fieldId,
         Name: c.name,
         Type: c.type,
         NDVI: c.ndvi,
-        Moisture: c.soilMoisture,
+        SoilMoisture: c.soilMoisture,
         Status: c.status,
-        Alerts: c.alerts.join('; ')
+        Alerts: c.alerts.join('; '),
+        NDRE: c.insights?.ndre ?? 'N/A',
+        VARI: c.insights?.vari ?? 'N/A',
+        GrowthStage: c.insights?.growthStage ?? 'N/A',
+        WaterStress: c.insights?.waterStress !== undefined ? `${c.insights.waterStress}%` : 'N/A',
+        ThermalStress: c.insights?.thermalStress !== undefined ? `${c.insights.thermalStress}%` : 'N/A',
+        WeedDensity: c.insights?.weedDensity !== undefined ? `${c.insights.weedDensity}%` : 'N/A',
+        CanopyCover: c.insights?.canopyCover !== undefined ? `${c.insights.canopyCover}%` : 'N/A',
+        PestPressure: c.insights?.pestPressure ?? 'N/A',
+        DiseaseRisk: c.insights?.diseaseRisk ?? 'N/A'
     }));
-    ExportService.exportToCSV(dataToExport, 'my_field_data.csv');
-    addNotification({ title: 'Data Exported', message: 'Field data downloaded as CSV.', type: 'INFO' });
+
+    ExportService.exportToCSV(dataToExport, `key_insights_export_${Date.now()}.csv`);
+    addNotification({ 
+      title: 'Success', 
+      message: 'Key crop insights and metrics exported as CSV successfully.', 
+      type: 'SUCCESS' 
+    });
+    setShowExportModal(false);
   };
 
   const handleDownloadPDF = async () => {
@@ -843,6 +1004,14 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
                     ref={fileInputRef}
                     type="file" 
                     accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <input 
+                    ref={nativeCameraInputRef}
+                    type="file" 
+                    accept="image/*"
+                    capture="environment"
                     onChange={handleImageUpload}
                     className="hidden"
                   />
@@ -1434,6 +1603,260 @@ export const CropDashboard: React.FC<CropDashboardProps> = ({ initialCropId, far
                 Add Crop
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showUploadSourceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-md overflow-hidden animate-scale-up">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Select Image Source</h3>
+              <button 
+                onClick={() => setShowUploadSourceModal(false)}
+                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {/* Option 2: Mobile Native System Camera (Capture File Input) */}
+              <button
+                onClick={() => {
+                  setShowUploadSourceModal(false);
+                  triggerNativeCamera();
+                }}
+                className="w-full flex items-center gap-4 p-4 text-left rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500 bg-white dark:bg-slate-950 hover:bg-emerald-50/25 dark:hover:bg-emerald-950/20 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Camera size={24} />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 dark:text-white text-sm">Snap Leaf (Phone Camera)</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Recommended for Mobile. Launches your device's native camera app.</p>
+                </div>
+              </button>
+
+              {/* Option 1: Live Interactive Camera Viewfinder */}
+              <button
+                onClick={() => {
+                  setShowUploadSourceModal(false);
+                  startCamera();
+                }}
+                className="w-full flex items-center gap-4 p-4 text-left rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-white dark:bg-slate-950 hover:bg-indigo-50/25 dark:hover:bg-indigo-950/20 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Camera size={24} />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 dark:text-white text-sm">Interactive Live Web Camera</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Stream direct webcam video and capture crop frames inline.</p>
+                </div>
+              </button>
+
+              {/* Option 3: Choose from Media Library / Drive */}
+              <button
+                onClick={() => {
+                  setShowUploadSourceModal(false);
+                  triggerDeviceUpload();
+                }}
+                className="w-full flex items-center gap-4 p-4 text-left rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:scale-110 transition-transform">
+                  <Image size={24} />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 dark:text-white text-sm">Choose from Device</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select a stored picture or file from your device directory or gallery.</p>
+                </div>
+              </button>
+            </div>
+            
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 text-[10px] text-slate-400 font-medium text-center border-t border-slate-100 dark:border-slate-700">
+              For diagnostic leaf inspection, ensure the leaf is well lit, centered, and fully visible.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLiveCameraModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl border border-slate-800 w-full max-w-lg overflow-hidden flex flex-col justify-between max-h-[90vh] animate-scale-up">
+            
+            {/* Camera Header */}
+            <div className="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-xs font-bold font-mono tracking-wider text-slate-400 uppercase">Live Diagnostic Viewfinder</span>
+              </div>
+              <button 
+                onClick={stopCamera}
+                className="p-1 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors"
+                title="Cancel"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Video Viewport / Feed container */}
+            <div className="bg-black relative aspect-[4/3] flex items-center justify-center overflow-hidden flex-1">
+              {cameraError ? (
+                <div className="p-6 text-center space-y-4 max-w-sm">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-rose-900/30 flex items-center justify-center text-rose-500">
+                    <X size={24} />
+                  </div>
+                  <h4 className="font-semibold text-sm">Webcam Access Blocked</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{cameraError}</p>
+                  <button
+                    onClick={() => {
+                      stopCamera();
+                      triggerNativeCamera();
+                    }}
+                    className="mt-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold transition-all"
+                  >
+                    Open Native Camera Fallback Instead
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <video 
+                    ref={videoRef}
+                    autoPlay 
+                    playsInline 
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Holographic scanning overlay ring */}
+                  <div className="absolute inset-0 pointer-events-none border-[3px] border-emerald-500/30 m-8 rounded-2xl flex items-center justify-center">
+                    <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-emerald-500/40 animate-scan-line shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                    <div className="text-[10px] bg-slate-950/80 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-bold font-mono tracking-widest uppercase">
+                      Center Cassava Leaf
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Camera Controls & Device Selector */}
+            <div className="p-5 bg-slate-950 border-t border-slate-800 space-y-4">
+              {!cameraError && cameraDevices.length > 1 && (
+                <div className="flex items-center justify-between text-xs text-slate-450">
+                  <span className="font-bold text-slate-400 flex items-center gap-1"><Settings size={12} /> Select Input Video feed:</span>
+                  <select 
+                    value={selectedCameraId}
+                    onChange={(e) => startCamera(e.target.value)}
+                    className="bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold text-slate-300 max-w-xs"
+                  >
+                    {cameraDevices.map((device, i) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Camera ${i + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-4 pt-1">
+                <button
+                  onClick={stopCamera}
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                
+                {!cameraError && (
+                  <button
+                    onClick={capturePhoto}
+                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg shadow-indigo-950/20 active:scale-95 duration-100 transition-all"
+                  >
+                    <Camera size={18} />
+                    Capture Leaf Photo
+                  </button>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden animate-scale-up">
+            
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
+              <div className="flex items-center gap-2">
+                <Download className="text-emerald-500" size={20} />
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">Export CSV Dataset</h3>
+              </div>
+              <button 
+                onClick={() => setShowExportModal(false)}
+                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Choose the dataset option you wish to compile and download as a CSV file.
+              </p>
+
+              {/* Option 1: Historical Reports */}
+              <button
+                onClick={handleExportHistoricalReports}
+                className="w-full flex items-start gap-4 p-4 text-left rounded-xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 bg-white dark:bg-slate-950 hover:bg-emerald-50/25 dark:hover:bg-emerald-950/10 transition-all group shadow-sm hover:shadow"
+              >
+                <div className="p-3 mt-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                  <FileText size={24} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-slate-850 dark:text-white text-sm flex items-center justify-between">
+                    <span>Historical Reports & Past Analyses</span>
+                    <span className="text-[10px] bg-slate-150 dark:bg-slate-850 text-slate-600 dark:text-slate-350 px-2 py-0.5 rounded-full font-mono font-medium">
+                      {reports.length} {reports.length === 1 ? 'record' : 'records'}
+                    </span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                    Downloads all logged diagnostic images, AI assessments, health parameters, list of issues, and critical recommendations.
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 2: Key Insights and Reports */}
+              <button
+                onClick={handleExportKeyInsights}
+                className="w-full flex items-start gap-4 p-4 text-left rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-slate-950 hover:bg-indigo-50/25 dark:hover:bg-indigo-950/10 transition-all group shadow-sm hover:shadow"
+              >
+                <div className="p-3 mt-0.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Sprout size={24} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-slate-850 dark:text-white text-sm flex items-center justify-between">
+                    <span>Key Fields, Insights & Metrics</span>
+                    <span className="text-[10px] bg-slate-150 dark:bg-slate-850 text-slate-600 dark:text-slate-350 px-2 py-0.5 rounded-full font-mono font-medium">
+                      {displayedCrops.length} {displayedCrops.length === 1 ? 'field' : 'fields'}
+                    </span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                    Downloads current crop status, NDVI indices, NDRE, VARI levels, moisture and soil parameters, stresses, and pest risks.
+                  </p>
+                </div>
+              </button>
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+
           </div>
         </div>
       )}

@@ -91,7 +91,17 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({ error: 'Registration failed. Please try again.' });
+    let errorMsg = 'Registration failed. Please try again.';
+    if (error && error.message) {
+      if (error.message.includes('quota') || error.message.includes('transfer limit') || error.message.includes('exceeded') || error.message.includes('Quota')) {
+        errorMsg = 'Database Quota Exceeded: Your Neon database has exceeded its free-tier data transfer limit. Please configure a new DATABASE_URL or upgrade the database plan, then redeploy/restart.';
+      } else if (error.message.includes('PrismaClient') || error.message.includes('Can\'t reach database') || error.message.includes('reach database')) {
+        errorMsg = 'Database Connection Failure: Unable to connect to PostgreSQL. Please make sure the DATABASE_URL is valid and accessible.';
+      } else {
+        errorMsg = `Registration Error: ${error.message}`;
+      }
+    }
+    res.status(500).json({ error: errorMsg });
   }
 });
 
@@ -146,7 +156,17 @@ router.post('/login', async (req, res) => {
 
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ error: 'Login failed. Please try again.' });
+    let errorMsg = 'Login failed. Please try again.';
+    if (error && error.message) {
+      if (error.message.includes('quota') || error.message.includes('transfer limit') || error.message.includes('exceeded') || error.message.includes('Quota')) {
+        errorMsg = 'Database Quota Exceeded: Your Neon database has exceeded its free-tier data transfer limit. Please configure a new DATABASE_URL or upgrade the database plan, then redeploy/restart.';
+      } else if (error.message.includes('PrismaClient') || error.message.includes('Can\'t reach database') || error.message.includes('reach database')) {
+        errorMsg = 'Database Connection Failure: Unable to connect to PostgreSQL. Please make sure the DATABASE_URL is valid and accessible.';
+      } else {
+        errorMsg = `Login Error: ${error.message}`;
+      }
+    }
+    res.status(500).json({ error: errorMsg });
   }
 });
 
