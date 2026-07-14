@@ -618,7 +618,11 @@ export const FarmMapPage: React.FC = () => {
                 zoom={zoom}
                 mapTypeId={mapType}
                 onClick={handleMapClick}
-                gestureHandling="cooperative"
+                onCameraChanged={(ev: any) => {
+                  setCenter(ev.detail.center);
+                  setZoom(ev.detail.zoom);
+                }}
+                gestureHandling="greedy"
                 mapId="DEMO_MAP_ID"
                 internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
                 style={{ width: '100%', height: '100%' }}
