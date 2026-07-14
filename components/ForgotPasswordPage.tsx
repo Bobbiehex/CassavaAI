@@ -19,7 +19,7 @@ export const ForgotPasswordPage: React.FC = () => {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, origin: window.location.origin }),
+        body: JSON.stringify({ email }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Something went wrong');

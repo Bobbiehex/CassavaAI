@@ -316,7 +316,12 @@ router.post('/logout', async (req, res) => {
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email, origin } = req.body;
+    const { email } = req.body;
+    
+    if (!process.env.NEXT_PUBLIC_APP_URL) {
+      throw new Error('NEXT_PUBLIC_APP_URL environment variable is not configured');
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     
     // Always return success to prevent user enumeration
@@ -337,7 +342,7 @@ router.post('/forgot-password', async (req, res) => {
       }
     });
 
-    const resetLink = `${origin || process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
+    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
     await sendPasswordResetEmail(email, resetLink);
 
     res.json({ message: 'If an account exists, a reset link has been sent.' });

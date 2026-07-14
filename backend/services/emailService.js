@@ -17,7 +17,7 @@ export const sendPasswordResetEmail = async (email, resetLink) => {
   try {
     const resend = getResendClient();
     await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: email,
       subject: 'Reset Your Password - Agrivision AI',
       html: `
