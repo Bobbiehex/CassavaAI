@@ -14,6 +14,8 @@ import { ProfilePage } from './components/ProfilePage';
 import { FarmSelector } from './components/FarmSelector';
 import { LoginPage } from './components/LoginPage';
 import { RegisterPage } from './components/RegisterPage';
+import { ForgotPasswordPage } from './components/ForgotPasswordPage';
+import { ResetPasswordPage } from './components/ResetPasswordPage';
 import { LandingPage } from './components/LandingPage';
 import { NotificationProvider } from './context/NotificationContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -132,6 +134,8 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
               <Route path="/register" element={user ? <Navigate to="/" /> : <RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/*" element={user ? ProtectedApp : <LandingPage />} />
             </Routes>
         </NotificationProvider>
